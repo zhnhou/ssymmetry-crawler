@@ -53,8 +53,6 @@ class babytree(RedisSpider):
                 if 'id' in cat:
                     # cat['id'] is int, why?
                     url = meitun_item_URL.replace("@id@", str(cat['id'])).replace("@pageNo@","1")
-                    
-                    print cat['id']
                     yield Request(url, callback=self.parse_index_page, priority=2, meta={'category':cat['name']})
 
 
@@ -62,3 +60,16 @@ class babytree(RedisSpider):
         links = response.xpath('//div[@class="products"]/ul[@class="plist"]/li/a/@href').extract()
         for url_short in links:
             url = 'http:'+url_short
+
+            yield Request(url, callback=self.parse_index_page, priority=1, meta={'category:':response.meta['category']})
+   
+        lis = response.xpath('//ul/li')
+
+        for li in lis:
+            try:
+                url = li.xpath('a/@href').extract()[0]
+                price = li.xpath('a/div[@class="txt"]/span[@class="r2"]/ins/text()').extract()[0]
+
+                print price
+            except:
+                continue 
