@@ -44,7 +44,7 @@ class babytree(RedisSpider):
         
         js = json.loads(response.body)
         
-        meitun_item_URL = "http://search.meitun.com/search/itempage?key=&fcategid=@id@&pageSize=20&pageNo=@pageSize@&slprice=0&salesvolume=0&hasInventoryOnly=0&brandid=&specificationid="
+        meitun_item_URL = "http://search.meitun.com/search/itempage?key=&fcategid=@id@&pageSize=20&pageNo=@pageNo@&slprice=0&salesvolume=0&hasInventoryOnly=0&brandid=&specificationid="
 
         # http://www.meitun.com/loadfc?callback=callback
 
@@ -52,6 +52,14 @@ class babytree(RedisSpider):
             for cat in main['childs']:
                 if 'id' in cat:
                     # cat['id'] is int, why?
-                    url = meitun_item_URL.replace("@id@", str(cat['id'])).replace("@pageSize@","1")
+                    url = meitun_item_URL.replace("@id@", str(cat['id'])).replace("@pageNo@","1")
+                    
+                    print cat['id'], cat['name']
+                    yield Request(url, callback=self.parse_index_page, priority=2, meta={'category':cat['name']})
 
-                    yield Request(url, callback=self.parse_index_page, priority=1, meta={'category':cat['name']})
+
+    def parse_index_page(self, response):
+        links = response.xpath('//div[@class="products"]/ul[@class="plist"]/li/a/@href').extract()
+        for url in links:
+            print url
+        exit()
