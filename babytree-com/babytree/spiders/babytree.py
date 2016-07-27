@@ -49,6 +49,9 @@ class babytree(RedisSpider):
         # http://www.meitun.com/loadfc?callback=callback
 
         for main in js['data']:
-            for brand in main['childs']:
-                if 'id' in brand:
-                    url = meitun_item_URL
+            for cat in main['childs']:
+                if 'id' in cat:
+                    # cat['id'] is int, why?
+                    url = meitun_item_URL.replace("@id@", str(cat['id'])).replace("@pageSize@","1")
+
+                    yield Request(url, callback=self.parse_index_page, priority=1, meta={'category':cat['name']})
